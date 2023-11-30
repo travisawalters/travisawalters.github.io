@@ -8,16 +8,16 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('resize', function() {
         if (window.innerWidth !== lastWidth) {
             zooming = true;
-            document.body.style.scrollSnapType = 'none'; // Temporarily disable scroll snapping
+            document.body.style.scrollSnapType = 'none';
             lastWidth = window.innerWidth;
         } else {
             zooming = false;
-            document.body.style.scrollSnapType = 'y mandatory'; // Re-enable scroll snapping
+            document.body.style.scrollSnapType = 'y mandatory';
         }
     });
 
     window.addEventListener('wheel', function (e) {
-        if (zooming) return; // Don't snap if the user is zooming
+        if (zooming) return;
 
         clearTimeout(isScrolling);
 
