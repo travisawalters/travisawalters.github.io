@@ -312,15 +312,15 @@
     
     <div class="container">
         <div class="tabs">
-            <div class="tab active" data-tab="inventory">Inventory</div>
-            <div class="tab" data-tab="add-tool">Add Tool</div>
-            <div class="tab" data-tab="import-export">Import/Export</div>
+            <div class="tab active" onclick="switchTab('inventory')">Inventory</div>
+            <div class="tab" onclick="switchTab('add-tool')">Add Tool</div>
+            <div class="tab" onclick="switchTab('import-export')">Import/Export</div>
         </div>
         
         <div id="tab-inventory" class="tab-content">
             <div class="search-bar">
                 <div class="search-input">
-                    <input type="text" id="search" placeholder="Search tools..." onkeyup="filterTools()">
+                    <input type="text" id="search" placeholder="Search tools..." oninput="filterTools()">
                 </div>
                 <div class="filter-group">
                     <select id="category-filter" onchange="filterTools()">
@@ -486,6 +486,9 @@
         let tools = [];
         let currentToolId = null;
         
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+        
         // Initialize app
         function initApp() {
             console.log("App initializing...");
@@ -510,26 +513,12 @@
                         preview.innerHTML = '';
                     }
                 });
-            } else {
-                console.error("Could not find tool-image element");
             }
             
-            // Set up tabs
-            const tabs = document.querySelectorAll('.tab');
-            console.log("Found " + tabs.length + " tabs");
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const tabId = this.getAttribute('data-tab');
-                    console.log("Tab clicked: " + tabId);
-                    switchTab(tabId);
-                });
-            });
-            
-            // Ensure we start with inventory tab visible
+            // Start with inventory tab visible
             switchTab('inventory');
         }
+        
         
         // Switch between tabs
         function switchTab(tabId) {
@@ -538,7 +527,7 @@
             // Update active tab
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
-                if (tab.getAttribute('data-tab') === tabId) {
+                if (tab.textContent.trim().toLowerCase().includes(tabId.toLowerCase())) {
                     tab.classList.add('active');
                 }
             });
@@ -810,6 +799,71 @@
         }
         
         // Filter tools
+        function filterTools() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const categoryFilter = document.getElementById('category-filter').value;
+            const tagFilter = document.getElementById('tag-filter').value;
+            
+            const filteredTools = tools.filter(tool => {
+                // Search filter
+                const searchMatch = search === '' ||
+                    tool.name.toLowerCase().includes(search) ||
+                    (tool.brand && tool.brand.toLowerCase().includes(search)) ||
+                    (tool.model && tool.model.toLowerCase().includes(search)) ||
+                    (tool.serial && tool.serial.toLowerCase().includes(search)) ||
+                    (tool.notes && tool.notes.toLowerCase().includes(search));
+                
+                // Category filter
+                const categoryMatch = categoryFilter === '' || tool.category === categoryFilter;
+                
+                // Tag filter
+                const tagMatch = tagFilter === '' || tool.tags.includes(tagFilter);
+                
+                return searchMatch && categoryMatch && tagMatch;
+            });
+            
+            // Sort filtered tools
+            const sortedTools = [...filteredTools].sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Render filtered tools
+            const grid = document.getElementById('tool-grid');
+            const noTools = document.getElementById('no-tools');
+            
+            if (sortedTools.length === 0) {
+                noTools.style.display = tools.length === 0 ? 'block' : 'none';
+                grid.innerHTML = tools.length > 0 ? '<p>No tools match your filters.</p>' : '';
+                return;
+            }
+            
+            noTools.style.display = 'none';
+            
+            // Generate HTML for each tool
+            let html = '';
+            sortedTools.forEach(tool => {
+                html += `
+                <div class="tool-card" data-id="${tool.id}">
+                    <div class="tool-img">
+                        ${tool.image ? `<img src="${tool.image}" alt="${tool.name}" onerror="this.src='/api/placeholder/200/150'; this.onerror=null;">` : '<span>No Image</span>'}
+                    </div>
+                    <div class="tool-details">
+                        <div class="tool-name">${tool.name}</div>
+                        <div class="tool-meta">${tool.brand ? tool.brand : ''}${tool.brand && tool.model ? ' | ' : ''}${tool.model ? tool.model : ''}</div>
+                        <div class="tool-tags">
+                            <span class="tag category-tag">${tool.category}</span>
+                            ${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="controls">
+                            <button onclick="viewTool('${tool.id}')" class="btn-primary">View</button>
+                            <button onclick="editTool('${tool.id}')" class="btn-secondary">Edit</button>
+                            <button onclick="deleteTool('${tool.id}')" class="btn-danger">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+        }
         function filterTools() {
             const search = document.getElementById('search').value.toLowerCase();
             const categoryFilter = document.getElementById('category-filter').value;
