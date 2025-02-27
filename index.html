@@ -3,32 +3,847 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Design Concepts</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>ToolTrack - Tool Inventory System</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        header {
+            background-color: var(--secondary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .tool-form {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+        
+        .form-group {
+            flex: 1 0 300px;
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .tool-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .tool-img {
+            height: 200px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .tool-img img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .tool-details {
+            padding: 1rem;
+        }
+        
+        .tool-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tool-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tool-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .tag {
+            background-color: var(--light);
+            color: var(--dark);
+            padding: 0.3rem 0.6rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+        }
+        
+        .category-tag {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            float: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .search-bar {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .search-input {
+            flex: 1 0 300px;
+        }
+        
+        .filter-group {
+            flex: 1 0 200px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .gallery-img {
+            height: 150px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .gallery-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            background-color: #f8d7da;
+            color: #721c24;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .form-group {
+                flex: 1 0 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-
-    <div class="page">
-        <h2>Introduction to Web Design</h2>
-        <p>Web design is the process of creating websites and web applications...</p>
-        <img src="images/img1.jpg" alt="Placeholder Image">
+    <header>
+        <h1>ToolTrack</h1>
+        <p>Simple Tool Inventory System</p>
+    </header>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="inventory">Inventory</div>
+            <div class="tab" data-tab="add-tool">Add Tool</div>
+            <div class="tab" data-tab="import-export">Import/Export</div>
+        </div>
+        
+        <div id="tab-inventory" class="tab-content">
+            <div class="search-bar">
+                <div class="search-input">
+                    <input type="text" id="search" placeholder="Search tools..." onkeyup="filterTools()">
+                </div>
+                <div class="filter-group">
+                    <select id="category-filter" onchange="filterTools()">
+                        <option value="">All Categories</option>
+                        <option value="Hand Tools">Hand Tools</option>
+                        <option value="Power Tools">Power Tools</option>
+                        <option value="Measuring Tools">Measuring Tools</option>
+                        <option value="Garden Tools">Garden Tools</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="tag-filter" onchange="filterTools()">
+                        <option value="">All Tags</option>
+                        <option value="Carpentry">Carpentry</option>
+                        <option value="Plumbing">Plumbing</option>
+                        <option value="Electrical">Electrical</option>
+                        <option value="Automotive">Automotive</option>
+                        <option value="Gardening">Gardening</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="tool-grid" class="tool-grid">
+                <!-- Tools will be displayed here -->
+                <div class="no-tools" id="no-tools">
+                    <p>No tools added yet. Click on "Add Tool" to get started.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab-add-tool" class="tab-content hidden">
+            <div class="tool-form">
+                <h2>Add New Tool</h2>
+                <div id="form-alert" class="alert">Please fill out all required fields.</div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tool-name">Tool Name *</label>
+                        <input type="text" id="tool-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tool-category">Category *</label>
+                        <select id="tool-category" required>
+                            <option value="">Select a category</option>
+                            <option value="Hand Tools">Hand Tools</option>
+                            <option value="Power Tools">Power Tools</option>
+                            <option value="Measuring Tools">Measuring Tools</option>
+                            <option value="Garden Tools">Garden Tools</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tool-brand">Brand</label>
+                        <input type="text" id="tool-brand">
+                    </div>
+                    <div class="form-group">
+                        <label for="tool-model">Model</label>
+                        <input type="text" id="tool-model">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tool-serial">Serial Number</label>
+                        <input type="text" id="tool-serial">
+                    </div>
+                    <div class="form-group">
+                        <label for="tool-purchase-date">Purchase Date</label>
+                        <input type="date" id="tool-purchase-date">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tool-purchase-price">Purchase Price</label>
+                        <input type="number" id="tool-purchase-price" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="tool-location">Storage Location</label>
+                        <input type="text" id="tool-location">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tool-tags">Tags (separate with commas)</label>
+                    <input type="text" id="tool-tags" placeholder="Carpentry, Plumbing, etc.">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tool-manual">Manual URL</label>
+                    <input type="url" id="tool-manual" placeholder="https://...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tool-notes">Notes</label>
+                    <textarea id="tool-notes" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tool-image">Thumbnail Image (URL or Base64)</label>
+                    <input type="text" id="tool-image" placeholder="https://... or data:image/...">
+                    <div class="image-preview" id="image-preview"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tool-gallery">Additional Images (URLs or Base64, separate with commas)</label>
+                    <input type="text" id="tool-gallery" placeholder="https://..., https://...">
+                </div>
+                
+                <div class="form-row">
+                    <button onclick="saveTool()" class="btn-primary">Save Tool</button>
+                    <button onclick="clearForm()" class="btn-secondary">Clear Form</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab-import-export" class="tab-content hidden">
+            <div class="tool-form">
+                <h2>Import/Export Tools</h2>
+                
+                <div class="form-group">
+                    <h3>Export Tools</h3>
+                    <p>Download your tool inventory as a CSV or JSON file.</p>
+                    <div class="form-row">
+                        <button onclick="exportTools('csv')" class="btn-primary">Export as CSV</button>
+                        <button onclick="exportTools('json')" class="btn-primary">Export as JSON</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <h3>Import Tools</h3>
+                    <p>Import tools from a CSV or JSON file. This will REPLACE your current inventory.</p>
+                    <input type="file" id="import-file" accept=".csv,.json">
+                    <div class="form-row" style="margin-top: 1rem;">
+                        <button onclick="importTools()" class="btn-primary">Import</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <h3>Reset Inventory</h3>
+                    <p>Warning: This will delete ALL tools in your inventory.</p>
+                    <button onclick="resetInventory()" class="btn-danger">Reset Inventory</button>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="page">
-        <h2>Principles of Design</h2>
-        <ul>
-            <li>Balance and Alignment</li>
-            <!-- More list items -->
-        </ul>
-        <img src="images/img2.jpg" alt="Placeholder Image">
+    
+    <div id="tool-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="tool-details">
+                <!-- Tool details will be displayed here -->
+            </div>
+        </div>
     </div>
-
-    <div class="page">
-        <h2>Responsive Design</h2>
-        <p>Responsive web design is an approach...</p>
-        <img src="images/img4.jpg" alt="Placeholder Image">
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+    
+    <script>
+        // Store for tools
+        let tools = [];
+        let currentToolId = null;
+        
+        // Initialize app
+        function initApp() {
+            // Load saved tools from localStorage
+            const savedTools = localStorage.getItem('tooltrack-tools');
+            if (savedTools) {
+                tools = JSON.parse(savedTools);
+                renderTools();
+            }
+            
+            // Set up image preview
+            document.getElementById('tool-image').addEventListener('input', function() {
+                const preview = document.getElementById('image-preview');
+                const imageUrl = this.value.trim();
+                
+                if (imageUrl) {
+                    preview.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.src='/api/placeholder/200/150'; this.onerror=null;">`;
+                } else {
+                    preview.innerHTML = '';
+                }
+            });
+            
+            // Set up tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+        }
+        
+        // Switch between tabs
+        function switchTab(tabId) {
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-tab') === tabId) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Show/hide tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            // Clear form if switching to add-tool tab
+            if (tabId === 'add-tool') {
+                currentToolId = null;
+                clearForm();
+            }
+        }
+        
+        // Save tool to inventory
+        function saveTool() {
+            const toolName = document.getElementById('tool-name').value.trim();
+            const toolCategory = document.getElementById('tool-category').value.trim();
+            
+            // Validate required fields
+            if (!toolName || !toolCategory) {
+                document.getElementById('form-alert').style.display = 'block';
+                return;
+            }
+            
+            // Hide alert
+            document.getElementById('form-alert').style.display = 'none';
+            
+            // Get tool data
+            const toolData = {
+                id: currentToolId || Date.now().toString(),
+                name: toolName,
+                category: toolCategory,
+                brand: document.getElementById('tool-brand').value.trim(),
+                model: document.getElementById('tool-model').value.trim(),
+                serial: document.getElementById('tool-serial').value.trim(),
+                purchaseDate: document.getElementById('tool-purchase-date').value,
+                purchasePrice: document.getElementById('tool-purchase-price').value,
+                location: document.getElementById('tool-location').value.trim(),
+                tags: document.getElementById('tool-tags').value.split(',').map(tag => tag.trim()).filter(tag => tag),
+                manual: document.getElementById('tool-manual').value.trim(),
+                notes: document.getElementById('tool-notes').value.trim(),
+                image: document.getElementById('tool-image').value.trim(),
+                gallery: document.getElementById('tool-gallery').value.split(',').map(url => url.trim()).filter(url => url)
+            };
+            
+            // Add or update tool
+            if (currentToolId) {
+                // Update existing tool
+                const index = tools.findIndex(tool => tool.id === currentToolId);
+                if (index !== -1) {
+                    tools[index] = toolData;
+                }
+            } else {
+                // Add new tool
+                tools.push(toolData);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('tooltrack-tools', JSON.stringify(tools));
+            
+            // Render tools
+            renderTools();
+            
+            // Clear form and switch to inventory tab
+            clearForm();
+            switchTab('inventory');
+        }
+        
+        // Clear the tool form
+        function clearForm() {
+            document.getElementById('tool-name').value = '';
+            document.getElementById('tool-category').value = '';
+            document.getElementById('tool-brand').value = '';
+            document.getElementById('tool-model').value = '';
+            document.getElementById('tool-serial').value = '';
+            document.getElementById('tool-purchase-date').value = '';
+            document.getElementById('tool-purchase-price').value = '';
+            document.getElementById('tool-location').value = '';
+            document.getElementById('tool-tags').value = '';
+            document.getElementById('tool-manual').value = '';
+            document.getElementById('tool-notes').value = '';
+            document.getElementById('tool-image').value = '';
+            document.getElementById('tool-gallery').value = '';
+            document.getElementById('image-preview').innerHTML = '';
+            document.getElementById('form-alert').style.display = 'none';
+        }
+        
+        // Render tools in the grid
+        function renderTools() {
+            const grid = document.getElementById('tool-grid');
+            const noTools = document.getElementById('no-tools');
+            
+            if (tools.length === 0) {
+                grid.innerHTML = '';
+                noTools.style.display = 'block';
+                return;
+            }
+            
+            noTools.style.display = 'none';
+            
+            // Sort tools by name
+            const sortedTools = [...tools].sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Generate HTML for each tool
+            let html = '';
+            sortedTools.forEach(tool => {
+                html += `
+                <div class="tool-card" data-id="${tool.id}">
+                    <div class="tool-img">
+                        ${tool.image ? `<img src="${tool.image}" alt="${tool.name}" onerror="this.src='/api/placeholder/200/150'; this.onerror=null;">` : '<span>No Image</span>'}
+                    </div>
+                    <div class="tool-details">
+                        <div class="tool-name">${tool.name}</div>
+                        <div class="tool-meta">${tool.brand ? tool.brand : ''}${tool.brand && tool.model ? ' | ' : ''}${tool.model ? tool.model : ''}</div>
+                        <div class="tool-tags">
+                            <span class="tag category-tag">${tool.category}</span>
+                            ${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="controls">
+                            <button onclick="viewTool('${tool.id}')" class="btn-primary">View</button>
+                            <button onclick="editTool('${tool.id}')" class="btn-secondary">Edit</button>
+                            <button onclick="deleteTool('${tool.id}')" class="btn-danger">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+        }
+        
+        // View tool details
+        function viewTool(id) {
+            const tool = tools.find(tool => tool.id === id);
+            if (!tool) return;
+            
+            let html = `
+            <h2>${tool.name}</h2>
+            <div class="tool-tags">
+                <span class="tag category-tag">${tool.category}</span>
+                ${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                ${tool.image ? `<img src="${tool.image}" alt="${tool.name}" style="max-width: 100%; max-height: 300px; margin-bottom: 1rem;" onerror="this.src='/api/placeholder/300/200'; this.onerror=null;">` : ''}
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee; width: 30%;">Brand</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.brand || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Model</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.model || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Serial Number</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.serial || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Purchase Date</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.purchaseDate || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Purchase Price</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.purchasePrice ? '$' + parseFloat(tool.purchasePrice).toFixed(2) : 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Storage Location</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.location || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Manual</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                        ${tool.manual ? `<a href="${tool.manual}" target="_blank">View Manual</a>` : 'N/A'}
+                    </td>
+                </tr>
+            </table>
+            
+            ${tool.notes ? `
+            <h3>Notes</h3>
+            <p>${tool.notes}</p>
+            ` : ''}
+            
+            ${tool.gallery && tool.gallery.length > 0 ? `
+            <h3>Gallery</h3>
+            <div class="gallery">
+                ${tool.gallery.map(img => `
+                <div class="gallery-img">
+                    <img src="${img}" alt="Tool Image" onerror="this.src='/api/placeholder/150/150'; this.onerror=null;">
+                </div>
+                `).join('')}
+            </div>
+            ` : ''}
+            
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                <button onclick="editTool('${tool.id}')" class="btn-secondary">Edit</button>
+                <button onclick="deleteTool('${tool.id}')" class="btn-danger">Delete</button>
+            </div>
+            `;
+            
+            document.getElementById('tool-details').innerHTML = html;
+            document.getElementById('tool-modal').style.display = 'flex';
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('tool-modal').style.display = 'none';
+        }
+        
+        // Edit tool
+        function editTool(id) {
+            const tool = tools.find(tool => tool.id === id);
+            if (!tool) return;
+            
+            // Set current tool ID
+            currentToolId = id;
+            
+            // Fill form
+            document.getElementById('tool-name').value = tool.name;
+            document.getElementById('tool-category').value = tool.category;
+            document.getElementById('tool-brand').value = tool.brand || '';
+            document.getElementById('tool-model').value = tool.model || '';
+            document.getElementById('tool-serial').value = tool.serial || '';
+            document.getElementById('tool-purchase-date').value = tool.purchaseDate || '';
+            document.getElementById('tool-purchase-price').value = tool.purchasePrice || '';
+            document.getElementById('tool-location').value = tool.location || '';
+            document.getElementById('tool-tags').value = tool.tags.join(', ');
+            document.getElementById('tool-manual').value = tool.manual || '';
+            document.getElementById('tool-notes').value = tool.notes || '';
+            document.getElementById('tool-image').value = tool.image || '';
+            document.getElementById('tool-gallery').value = tool.gallery.join(', ');
+            
+            // Update image preview
+            const preview = document.getElementById('image-preview');
+            if (tool.image) {
+                preview.innerHTML = `<img src="${tool.image}" alt="Preview" onerror="this.src='/api/placeholder/200/150'; this.onerror=null;">`;
+            } else {
+                preview.innerHTML = '';
+            }
+            
+            // Switch to add tool tab
+            switchTab('add-tool');
+            
+            // Close modal if open
+            closeModal();
+        }
+        
+        // Delete tool
+        function deleteTool(id) {
+            if (confirm('Are you sure you want to delete this tool?')) {
+                tools = tools.filter(tool => tool.id !== id);
+                localStorage.setItem('tooltrack-tools', JSON.stringify(tools));
+                renderTools();
+                closeModal();
+            }
+        }
+        
+        // Filter tools
+        function filterTools() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const categoryFilter = document.getElementById('category-filter').value;
+            const tagFilter = document.getElementById('tag-filter').value;
+            
+            const filteredTools = tools.filter(tool => {
+                // Search filter
+                const searchMatch = search === '' ||
+                    tool.name.toLowerCase().includes(search) ||
+                    (tool.brand && tool.brand.toLowerCase().includes(search)) ||
+                    (tool.model && tool.model.toLowerCase().includes(search)) ||
+                    (tool.serial && tool.serial.toLowerCase().includes(search)) ||
+                    (tool.notes && tool.notes.toLowerCase().includes(search));
+                
+                // Category filter
+                const categoryMatch = categoryFilter === '' || tool.category === categoryFilter;
+                
+                // Tag filter
+                const tagMatch = tagFilter === '' || tool.tags.includes(tagFilter);
+                
+                return searchMatch && categoryMatch && tagMatch;
+            });
+            
+            // Sort filtered tools
+            const sortedTools = [...filteredTools].sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Render filtered tools
+            const grid = document.getElementById('tool-grid');
+            const noTools = document.getElementById('no-tools');
+            
+            if (sortedTools.length === 0) {
+                grid.innerHTML = '<p>No tools match your filters.</p>';
+                return;
+            }
+            
+            // Generate HTML for each tool
+            let html = '';
+            sortedTools.forEach(tool => {
+                html += `
+                <div class="tool-card" data-id="${tool.id}">
+                    <div class="tool-img">
+                        ${tool.image ? `<img src="${tool.image}" alt="${tool.name}" onerror="this.src='/api/placeholder/200/150'; this.onerror=null;">` : '<span>No Image</span>'}
+                    </div>
+                    <div class="tool-details">
+                        <div class="tool-name">${tool.name}</div>
+                        <div class="tool-meta">${tool.brand ? tool.brand : ''}${tool.brand && tool.model ? ' | ' : ''}${tool.model ? tool.model : ''}</div>
+                        <div class="tool-tags">
+                            <span class="tag category-tag">${tool.category}</span>
+                            ${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="controls">
+                            <button onclick="viewTool('${tool.id}')" class="btn-primary">View</button>
+                            <button onclick="editTool('${tool.id}')" class="btn-secondary">Edit</button>
+                            <button onclick="deleteTool('${tool.id}')" class="btn-danger">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
