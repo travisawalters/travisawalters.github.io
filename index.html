@@ -312,18 +312,18 @@
     
     <div class="container">
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('inventory')">Inventory</div>
-            <div class="tab" onclick="switchTab('add-tool')">Add Tool</div>
-            <div class="tab" onclick="switchTab('import-export')">Import/Export</div>
+            <div class="tab active" id="tab-btn-inventory">Inventory</div>
+            <div class="tab" id="tab-btn-add-tool">Add Tool</div>
+            <div class="tab" id="tab-btn-import-export">Import/Export</div>
         </div>
         
         <div id="tab-inventory" class="tab-content">
             <div class="search-bar">
                 <div class="search-input">
-                    <input type="text" id="search" placeholder="Search tools..." oninput="filterTools()">
+                    <input type="text" id="search" placeholder="Search tools...">
                 </div>
                 <div class="filter-group">
-                    <select id="category-filter" onchange="filterTools()">
+                    <select id="category-filter">
                         <option value="">All Categories</option>
                         <option value="Hand Tools">Hand Tools</option>
                         <option value="Power Tools">Power Tools</option>
@@ -333,7 +333,7 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <select id="tag-filter" onchange="filterTools()">
+                    <select id="tag-filter">
                         <option value="">All Tags</option>
                         <option value="Carpentry">Carpentry</option>
                         <option value="Plumbing">Plumbing</option>
@@ -435,8 +435,8 @@
                 </div>
                 
                 <div class="form-row">
-                    <button onclick="saveTool()" class="btn-primary">Save Tool</button>
-                    <button onclick="clearForm()" class="btn-secondary">Clear Form</button>
+                    <button id="save-tool-btn" class="btn-primary">Save Tool</button>
+                    <button id="clear-form-btn" class="btn-secondary">Clear Form</button>
                 </div>
             </div>
         </div>
@@ -449,8 +449,8 @@
                     <h3>Export Tools</h3>
                     <p>Download your tool inventory as a CSV or JSON file.</p>
                     <div class="form-row">
-                        <button onclick="exportTools('csv')" class="btn-primary">Export as CSV</button>
-                        <button onclick="exportTools('json')" class="btn-primary">Export as JSON</button>
+                        <button id="export-csv-btn" class="btn-primary">Export as CSV</button>
+                        <button id="export-json-btn" class="btn-primary">Export as JSON</button>
                     </div>
                 </div>
                 
@@ -459,14 +459,14 @@
                     <p>Import tools from a CSV or JSON file. This will REPLACE your current inventory.</p>
                     <input type="file" id="import-file" accept=".csv,.json">
                     <div class="form-row" style="margin-top: 1rem;">
-                        <button onclick="importTools()" class="btn-primary">Import</button>
+                        <button id="import-btn" class="btn-primary">Import</button>
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <h3>Reset Inventory</h3>
                     <p>Warning: This will delete ALL tools in your inventory.</p>
-                    <button onclick="resetInventory()" class="btn-danger">Reset Inventory</button>
+                    <button id="reset-btn" class="btn-danger">Reset Inventory</button>
                 </div>
             </div>
         </div>
@@ -474,7 +474,7 @@
     
     <div id="tool-modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
+            <span class="close" id="close-modal">&times;</span>
             <div id="tool-details">
                 <!-- Tool details will be displayed here -->
             </div>
@@ -486,12 +486,15 @@
         let tools = [];
         let currentToolId = null;
         
-        // Initialize app when page loads
-        document.addEventListener('DOMContentLoaded', initApp);
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded");
+            initApp();
+        });
         
         // Initialize app
         function initApp() {
-            console.log("App initializing...");
+            console.log("Initializing app...");
             
             // Load saved tools from localStorage
             const savedTools = localStorage.getItem('tooltrack-tools');
@@ -500,25 +503,58 @@
                 renderTools();
             }
             
-            // Set up image preview
-            const toolImageInput = document.getElementById('tool-image');
-            if (toolImageInput) {
-                toolImageInput.addEventListener('input', function() {
-                    const preview = document.getElementById('image-preview');
-                    const imageUrl = this.value.trim();
-                    
-                    if (imageUrl) {
-                        preview.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.src='/api/placeholder/200/150'; this.onerror=null;">`;
-                    } else {
-                        preview.innerHTML = '';
-                    }
-                });
-            }
+            // Set up tab switching
+            document.getElementById('tab-btn-inventory').addEventListener('click', function() {
+                switchTab('inventory');
+            });
             
-            // Start with inventory tab visible
+            document.getElementById('tab-btn-add-tool').addEventListener('click', function() {
+                switchTab('add-tool');
+            });
+            
+            document.getElementById('tab-btn-import-export').addEventListener('click', function() {
+                switchTab('import-export');
+            });
+            
+            // Set up search and filters
+            document.getElementById('search').addEventListener('input', filterTools);
+            document.getElementById('category-filter').addEventListener('change', filterTools);
+            document.getElementById('tag-filter').addEventListener('change', filterTools);
+            
+            // Set up image preview
+            document.getElementById('tool-image').addEventListener('input', function() {
+                const preview = document.getElementById('image-preview');
+                const imageUrl = this.value.trim();
+                
+                if (imageUrl) {
+                    preview.innerHTML = `<img src="${imageUrl}" alt="Preview" onerror="this.src='/api/placeholder/200/150'; this.onerror=null;">`;
+                } else {
+                    preview.innerHTML = '';
+                }
+            });
+            
+            // Set up form buttons
+            document.getElementById('save-tool-btn').addEventListener('click', saveTool);
+            document.getElementById('clear-form-btn').addEventListener('click', clearForm);
+            
+            // Set up export/import buttons
+            document.getElementById('export-csv-btn').addEventListener('click', function() {
+                exportTools('csv');
+            });
+            
+            document.getElementById('export-json-btn').addEventListener('click', function() {
+                exportTools('json');
+            });
+            
+            document.getElementById('import-btn').addEventListener('click', importTools);
+            document.getElementById('reset-btn').addEventListener('click', resetInventory);
+            
+            // Set up modal close button
+            document.getElementById('close-modal').addEventListener('click', closeModal);
+            
+            // Ensure we start with inventory tab visible
             switchTab('inventory');
         }
-        
         
         // Switch between tabs
         function switchTab(tabId) {
@@ -527,23 +563,15 @@
             // Update active tab
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
-                if (tab.textContent.trim().toLowerCase().includes(tabId.toLowerCase())) {
-                    tab.classList.add('active');
-                }
             });
+            document.getElementById(`tab-btn-${tabId}`).classList.add('active');
             
             // Show/hide tab content
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.add('hidden');
             });
             
-            const targetTab = document.getElementById(`tab-${tabId}`);
-            if (targetTab) {
-                targetTab.classList.remove('hidden');
-                console.log("Tab content displayed: " + tabId);
-            } else {
-                console.error("Could not find tab content: tab-" + tabId);
-            }
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             
             // Clear form if switching to add-tool tab
             if (tabId === 'add-tool') {
@@ -670,134 +698,6 @@
             grid.innerHTML = html;
         }
         
-        // View tool details
-        function viewTool(id) {
-            const tool = tools.find(tool => tool.id === id);
-            if (!tool) return;
-            
-            let html = `
-            <h2>${tool.name}</h2>
-            <div class="tool-tags">
-                <span class="tag category-tag">${tool.category}</span>
-                ${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-            </div>
-            
-            <div style="margin-top: 1.5rem;">
-                ${tool.image ? `<img src="${tool.image}" alt="${tool.name}" style="max-width: 100%; max-height: 300px; margin-bottom: 1rem;" onerror="this.src='/api/placeholder/300/200'; this.onerror=null;">` : ''}
-            </div>
-            
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
-                <tr>
-                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee; width: 30%;">Brand</th>
-                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.brand || 'N/A'}</td>
-                </tr>
-                <tr>
-                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Model</th>
-                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.model || 'N/A'}</td>
-                </tr>
-                <tr>
-                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Serial Number</th>
-                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.serial || 'N/A'}</td>
-                </tr>
-                <tr>
-                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Purchase Date</th>
-                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.purchaseDate || 'N/A'}</td>
-                </tr>
-                <tr>
-                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Purchase Price</th>
-                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.purchasePrice ? '$' + parseFloat(tool.purchasePrice).toFixed(2) : 'N/A'}</td>
-                </tr>
-                <tr>
-                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Storage Location</th>
-                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.location || 'N/A'}</td>
-                </tr>
-                <tr>
-                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Manual</th>
-                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">
-                        ${tool.manual ? `<a href="${tool.manual}" target="_blank">View Manual</a>` : 'N/A'}
-                    </td>
-                </tr>
-            </table>
-            
-            ${tool.notes ? `
-            <h3>Notes</h3>
-            <p>${tool.notes}</p>
-            ` : ''}
-            
-            ${tool.gallery && tool.gallery.length > 0 ? `
-            <h3>Gallery</h3>
-            <div class="gallery">
-                ${tool.gallery.map(img => `
-                <div class="gallery-img">
-                    <img src="${img}" alt="Tool Image" onerror="this.src='/api/placeholder/150/150'; this.onerror=null;">
-                </div>
-                `).join('')}
-            </div>
-            ` : ''}
-            
-            <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
-                <button onclick="editTool('${tool.id}')" class="btn-secondary">Edit</button>
-                <button onclick="deleteTool('${tool.id}')" class="btn-danger">Delete</button>
-            </div>
-            `;
-            
-            document.getElementById('tool-details').innerHTML = html;
-            document.getElementById('tool-modal').style.display = 'flex';
-        }
-        
-        // Close modal
-        function closeModal() {
-            document.getElementById('tool-modal').style.display = 'none';
-        }
-        
-        // Edit tool
-        function editTool(id) {
-            const tool = tools.find(tool => tool.id === id);
-            if (!tool) return;
-            
-            // Set current tool ID
-            currentToolId = id;
-            
-            // Fill form
-            document.getElementById('tool-name').value = tool.name;
-            document.getElementById('tool-category').value = tool.category;
-            document.getElementById('tool-brand').value = tool.brand || '';
-            document.getElementById('tool-model').value = tool.model || '';
-            document.getElementById('tool-serial').value = tool.serial || '';
-            document.getElementById('tool-purchase-date').value = tool.purchaseDate || '';
-            document.getElementById('tool-purchase-price').value = tool.purchasePrice || '';
-            document.getElementById('tool-location').value = tool.location || '';
-            document.getElementById('tool-tags').value = tool.tags.join(', ');
-            document.getElementById('tool-manual').value = tool.manual || '';
-            document.getElementById('tool-notes').value = tool.notes || '';
-            document.getElementById('tool-image').value = tool.image || '';
-            document.getElementById('tool-gallery').value = tool.gallery.join(', ');
-            
-            // Update image preview
-            const preview = document.getElementById('image-preview');
-            if (tool.image) {
-                preview.innerHTML = `<img src="${tool.image}" alt="Preview" onerror="this.src='/api/placeholder/200/150'; this.onerror=null;">`;
-            } else {
-                preview.innerHTML = '';
-            }
-            
-            // Switch to add tool tab
-            switchTab('add-tool');
-            
-            // Close modal if open
-            closeModal();
-        }
-        
-        // Delete tool
-        function deleteTool(id) {
-            if (confirm('Are you sure you want to delete this tool?')) {
-                tools = tools.filter(tool => tool.id !== id);
-                localStorage.setItem('tooltrack-tools', JSON.stringify(tools));
-                renderTools();
-                closeModal();
-            }
-        }
-        
         // Filter tools
         function filterTools() {
             const search = document.getElementById('search').value.toLowerCase();
@@ -864,64 +764,49 @@
             
             grid.innerHTML = html;
         }
-        function filterTools() {
-            const search = document.getElementById('search').value.toLowerCase();
-            const categoryFilter = document.getElementById('category-filter').value;
-            const tagFilter = document.getElementById('tag-filter').value;
+        
+        // View tool details
+        function viewTool(id) {
+            const tool = tools.find(tool => tool.id === id);
+            if (!tool) return;
             
-            const filteredTools = tools.filter(tool => {
-                // Search filter
-                const searchMatch = search === '' ||
-                    tool.name.toLowerCase().includes(search) ||
-                    (tool.brand && tool.brand.toLowerCase().includes(search)) ||
-                    (tool.model && tool.model.toLowerCase().includes(search)) ||
-                    (tool.serial && tool.serial.toLowerCase().includes(search)) ||
-                    (tool.notes && tool.notes.toLowerCase().includes(search));
-                
-                // Category filter
-                const categoryMatch = categoryFilter === '' || tool.category === categoryFilter;
-                
-                // Tag filter
-                const tagMatch = tagFilter === '' || tool.tags.includes(tagFilter);
-                
-                return searchMatch && categoryMatch && tagMatch;
-            });
+            let html = `
+            <h2>${tool.name}</h2>
+            <div class="tool-tags">
+                <span class="tag category-tag">${tool.category}</span>
+                ${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            </div>
             
-            // Sort filtered tools
-            const sortedTools = [...filteredTools].sort((a, b) => a.name.localeCompare(b.name));
+            <div style="margin-top: 1.5rem;">
+                ${tool.image ? `<img src="${tool.image}" alt="${tool.name}" style="max-width: 100%; max-height: 300px; margin-bottom: 1rem;" onerror="this.src='/api/placeholder/300/200'; this.onerror=null;">` : ''}
+            </div>
             
-            // Render filtered tools
-            const grid = document.getElementById('tool-grid');
-            const noTools = document.getElementById('no-tools');
-            
-            if (sortedTools.length === 0) {
-                grid.innerHTML = '<p>No tools match your filters.</p>';
-                return;
-            }
-            
-            // Generate HTML for each tool
-            let html = '';
-            sortedTools.forEach(tool => {
-                html += `
-                <div class="tool-card" data-id="${tool.id}">
-                    <div class="tool-img">
-                        ${tool.image ? `<img src="${tool.image}" alt="${tool.name}" onerror="this.src='/api/placeholder/200/150'; this.onerror=null;">` : '<span>No Image</span>'}
-                    </div>
-                    <div class="tool-details">
-                        <div class="tool-name">${tool.name}</div>
-                        <div class="tool-meta">${tool.brand ? tool.brand : ''}${tool.brand && tool.model ? ' | ' : ''}${tool.model ? tool.model : ''}</div>
-                        <div class="tool-tags">
-                            <span class="tag category-tag">${tool.category}</span>
-                            ${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                        </div>
-                        <div class="controls">
-                            <button onclick="viewTool('${tool.id}')" class="btn-primary">View</button>
-                            <button onclick="editTool('${tool.id}')" class="btn-secondary">Edit</button>
-                            <button onclick="deleteTool('${tool.id}')" class="btn-danger">Delete</button>
-                        </div>
-                    </div>
-                </div>
-                `;
-            });
-            
-            grid.innerHTML = html;
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee; width: 30%;">Brand</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.brand || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Model</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.model || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Serial Number</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.serial || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Purchase Date</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.purchaseDate || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Purchase Price</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.purchasePrice ? '$' + parseFloat(tool.purchasePrice).toFixed(2) : 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Storage Location</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">${tool.location || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid #eee;">Manual</th>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                        ${tool.manual ? `<a href="${tool.manual}" target="_blank">View Manual</a>` : 'N/A'}
